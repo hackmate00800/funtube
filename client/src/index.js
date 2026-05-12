@@ -4,11 +4,11 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { Provider } from 'react-redux';
 import { store } from './store/store';
-window.__store = store;
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import App from './App';
 import './styles/index.css';
+window.__store = store;
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
