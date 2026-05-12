@@ -1,0 +1,52 @@
+{
+  "name": "funtime",
+  "version": "1.0.0",
+  "description": "FunTube - Modern YouTube-like Desktop Application",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\" \"npm run electron\"",
+    "server": "cd server && node index.js",
+    "client": "cd client && set BROWSER=none && react-scripts start",
+    "electron": "wait-on http://localhost:3000 && electron .",
+    "build": "cd client && react-scripts build",
+    "start": "electron .",
+    "server:dev": "cd server && nodemon index.js"
+  },
+  "build": {
+    "appId": "com.funtime.app",
+    "productName": "FunTube",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**/*",
+      "client/build/**/*",
+      "server/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "client/public/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "client/public/icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "client/public/icon.png"
+    }
+  },
+  "dependencies": {
+    "auto-launch": "^5.0.6",
+    "electron-is-dev": "^2.0.0",
+    "electron-store": "^8.1.0",
+    "electron-updater": "^6.8.3"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "electron": "^42.0.1",
+    "electron-builder": "^26.8.1",
+    "nodemon": "^3.0.2",
+    "wait-on": "^7.2.0"
+  }
+}

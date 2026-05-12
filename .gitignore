@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Build output
+client/build/
+release/
+dist/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Uploads
+uploads/videos/*
+uploads/thumbnails/*
+uploads/temp/*
+!uploads/videos/.gitkeep
+!uploads/thumbnails/.gitkeep
+!uploads/temp/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Electron
+out/
+
+# Coverage
+coverage/
+
+# Misc
+*.tgz
+*.cache
