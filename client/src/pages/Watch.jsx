@@ -172,7 +172,7 @@ const Watch = () => {
           <div className="relative aspect-video bg-black rounded-2xl overflow-hidden group shadow-glow-sm border border-white/5">
             <ReactPlayer
               ref={playerRef}
-              url={`http://localhost:5000/api/videos/${video._id}/stream/${quality}`}
+              url={`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/videos/${video._id}/stream/${quality}`}
               width="100%"
               height="100%"
               controls
