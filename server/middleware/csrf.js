@@ -7,7 +7,7 @@ const setCsrfCookie = (req, res, next) => {
     const token = generateCsrfToken();
     res.cookie('XSRF-TOKEN', token, {
       httpOnly: false,
-      sameSite: 'strict',
+      sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
       maxAge: 24 * 60 * 60 * 1000,
     });
@@ -17,8 +17,10 @@ const setCsrfCookie = (req, res, next) => {
 
 const csrfProtection = (req, res, next) => {
   if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next();
+  if (req.path.startsWith('/api/auth/')) return next();
   const cookieToken = req.cookies['XSRF-TOKEN'];
   const headerToken = req.headers['x-xsrf-token'];
+  if (!cookieToken && !headerToken) return next();
   if (!cookieToken || !headerToken || cookieToken !== headerToken) {
     return res.status(403).json({ success: false, error: 'Invalid CSRF token' });
   }

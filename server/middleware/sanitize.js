@@ -1,11 +1,14 @@
 const xss = require('xss');
 
-const stripXSS = (value) => {
+const SKIP_FIELDS = new Set(['password', 'confirmPassword', 'currentPassword', 'newPassword', 'token']);
+
+const stripXSS = (value, key) => {
+  if (key && SKIP_FIELDS.has(key)) return value;
   if (typeof value === 'string') return xss(value, { whiteList: {} });
-  if (Array.isArray(value)) return value.map(stripXSS);
+  if (Array.isArray(value)) return value.map((v, i) => stripXSS(v, i));
   if (value && typeof value === 'object') {
     const sanitized = {};
-    for (const [key, val] of Object.entries(value)) sanitized[key] = stripXSS(val);
+    for (const [k, val] of Object.entries(value)) sanitized[k] = stripXSS(val, k);
     return sanitized;
   }
   return value;

@@ -5,6 +5,20 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 let navigateToLogin = null;
 export const setNavigateCallback = (fn) => { navigateToLogin = fn; };
 
+let _csrfToken = '';
+
+export const fetchCsrfToken = async () => {
+  try {
+    const { data } = await api.get('/auth/csrf');
+    if (data.token) _csrfToken = data.token;
+    return _csrfToken;
+  } catch {
+    return '';
+  }
+};
+
+export const getCsrfToken = () => _csrfToken;
+
 const api = axios.create({
   baseURL: API_URL,
   withCredentials: true,
@@ -13,11 +27,6 @@ const api = axios.create({
   },
 });
 
-const getCookie = (name) => {
-  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
-  return match ? match[2] : '';
-};
-
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -25,8 +34,7 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     if (config.method !== 'get' && config.method !== 'head' && config.method !== 'options') {
-      const xsrfToken = getCookie('XSRF-TOKEN');
-      if (xsrfToken) config.headers['X-XSRF-TOKEN'] = xsrfToken;
+      if (_csrfToken) config.headers['X-XSRF-TOKEN'] = _csrfToken;
     }
     return config;
   },

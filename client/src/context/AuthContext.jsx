@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import { authAPI } from '../services/api';
+import { authAPI, fetchCsrfToken } from '../services/api';
 
 export const AuthContext = createContext();
 
@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('token');
     } finally {
       setLoading(false);
+      fetchCsrfToken();
     }
   }, [setUser]);
 
@@ -58,6 +59,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(data.user));
         setUser(data.user);
       }
+      fetchCsrfToken();
       return data;
     } catch (err) {
       const message = err.response?.data?.error || err.response?.data?.message || 'Login failed';
@@ -75,6 +77,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(data.user));
         setUser(data.user);
       }
+      fetchCsrfToken();
       return data;
     } catch (err) {
       const message = err.response?.data?.error || err.response?.data?.message || 'Registration failed';
