@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
+const passport = require('../config/passport');
+const jwt = require('jsonwebtoken');
 const {
   register,
   login,
@@ -40,5 +42,36 @@ router.put('/create-channel', protect, uploadAvatar.fields([
   { name: 'avatar', maxCount: 1 },
   { name: 'cover', maxCount: 1 },
 ]), createChannel);
+
+router.get('/csrf', (req, res) => {
+  res.json({ success: true, token: req.cookies['XSRF-TOKEN'] || '' });
+});
+
+// Google OAuth
+router.get('/google', passport.authenticate('google', {
+  scope: ['profile', 'email'],
+  session: true,
+}));
+
+router.get('/google/callback',
+  passport.authenticate('google', {
+    session: false,
+    failureRedirect: `${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=google-auth-failed`,
+  }),
+  (req, res) => {
+    const token = jwt.sign(
+      { id: req.user._id, role: req.user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRE || '7d' }
+    );
+    const options = {
+      expires: new Date(Date.now() + parseInt(process.env.JWT_COOKIE_EXPIRE || 7) * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+    };
+    res.cookie('token', token, options);
+    res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}?google-auth=success`);
+  }
+);
 
 module.exports = router;

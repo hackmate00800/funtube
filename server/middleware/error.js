@@ -1,4 +1,5 @@
 const ErrorResponse = require('../utils/errorResponse');
+const logger = require('../utils/logger');
 
 const errorHandler = (err, req, res, next) => {
   let statusCode = err.statusCode || 500;
@@ -13,7 +14,7 @@ const errorHandler = (err, req, res, next) => {
 
   if (err.name === 'CastError') {
     statusCode = 404;
-    message = `Resource not found with id of ${err.value}`;
+    message = `Resource not found`;
   }
 
   if (err.code === 11000) {
@@ -37,9 +38,14 @@ const errorHandler = (err, req, res, next) => {
     message = 'Token expired';
   }
 
+  if (process.env.NODE_ENV !== 'test') {
+    logger.error(err.stack || err.message);
+  }
+
   res.status(statusCode).json({
     success: false,
     error: message,
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 };
 

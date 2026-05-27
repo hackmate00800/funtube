@@ -10,13 +10,9 @@ export const AuthProvider = ({ children }) => {
 
   const loadUser = useCallback(async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setLoading(false);
-        return;
-      }
       const { data } = await authAPI.getMe();
       setUser(data.data);
+      if (data.token) localStorage.setItem('token', data.token);
     } catch (err) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');

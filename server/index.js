@@ -6,14 +6,19 @@ const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const mongoSanitize = require('express-mongo-sanitize');
 const rateLimit = require('express-rate-limit');
+const session = require('express-session');
 const path = require('path');
 const dotenv = require('dotenv');
 const logger = require('./utils/logger');
 
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
+const passport = require('./config/passport');
+
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/error');
+const xssSanitize = require('./middleware/sanitize');
+const { setCsrfCookie, csrfProtection } = require('./middleware/csrf');
 
 const app = express();
 const server = http.createServer(app);
@@ -27,12 +32,45 @@ const io = new Server(server, {
 
 app.set('io', io);
 
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://apis.google.com'],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+      mediaSrc: ["'self'", 'blob:', 'https:'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      connectSrc: ["'self'", 'https://apis.google.com', 'wss:'],
+      frameSrc: ["'self'", 'https://accounts.google.com'],
+      workerSrc: ["'self'", 'blob:'],
+    },
+  },
+  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  frameguard: { action: 'deny' },
+  noSniff: true,
+  hidePoweredBy: true,
+  ieNoOpen: true,
+}));
 app.use(cors({ origin: clientUrl, credentials: true }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(mongoSanitize());
+app.use(xssSanitize);
+app.use(setCsrfCookie);
+app.use(csrfProtection);
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, maxAge: 24 * 60 * 60 * 1000 },
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

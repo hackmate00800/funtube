@@ -13,11 +13,20 @@ const api = axios.create({
   },
 });
 
+const getCookie = (name) => {
+  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+  return match ? match[2] : '';
+};
+
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    if (config.method !== 'get' && config.method !== 'head' && config.method !== 'options') {
+      const xsrfToken = getCookie('XSRF-TOKEN');
+      if (xsrfToken) config.headers['X-XSRF-TOKEN'] = xsrfToken;
     }
     return config;
   },
