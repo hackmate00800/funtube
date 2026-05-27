@@ -16,6 +16,8 @@ services:
         sync: false
       - key: JWT_SECRET
         sync: false
+      - key: JWT_EXPIRE
+        value: 7d
       - key: JWT_COOKIE_EXPIRE
         value: "7"
       - key: GEMINI_API_KEY
@@ -42,5 +44,17 @@ services:
         value: noreply@funtime.app
       - key: FROM_NAME
         value: FunTube
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        value: https://funtime-api.onrender.com/api/auth/google/callback
+      - key: SESSION_SECRET
+        sync: false
       - key: CLIENT_URL
         value: https://funtime.vercel.app
+      - key: MAX_FILE_SIZE
+        value: "500000000"
+      - key: FFMPEG_PATH
+        value: ffmpeg
