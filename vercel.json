@@ -1,8 +1,8 @@
 {
-  "installCommand": "cd client && npm install --legacy-peer-deps",
-  "buildCommand": "cd client && CI=false npm run build",
-  "outputDirectory": "client/build",
-  "devCommand": "cd client && npm start",
+  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "CI=false npm run build",
+  "outputDirectory": "build",
+  "devCommand": "npm start",
   "framework": "create-react-app",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
