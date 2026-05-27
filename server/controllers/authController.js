@@ -5,10 +5,9 @@ const crypto = require('crypto');
 
 const sendTokenResponse = (user, statusCode, res) => {
   const token = user.generateAuthToken();
+  const cookieDays = parseInt(process.env.JWT_COOKIE_EXPIRE) || 7;
   const options = {
-    expires: new Date(
-      Date.now() + parseInt(process.env.JWT_COOKIE_EXPIRE) * 24 * 60 * 60 * 1000
-    ),
+    expires: new Date(Date.now() + cookieDays * 24 * 60 * 60 * 1000),
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
   };
@@ -164,9 +163,8 @@ exports.forgotPassword = async (req, res, next) => {
     const resetToken = user.getResetPasswordToken();
     await user.save({ validateBeforeSave: false });
 
-    const resetUrl = `${req.protocol}://${req.get(
-      'host'
-    )}/api/auth/reset-password/${resetToken}`;
+    const clientUrl = process.env.CLIENT_URL || `${req.protocol}://${req.get('host')}`;
+    const resetUrl = `${clientUrl}/reset-password/${resetToken}`;
 
     try {
       await sendEmail({

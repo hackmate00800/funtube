@@ -11,6 +11,7 @@ const Login = () => {
   const [searchParams] = useSearchParams();
   const [form, setForm] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (searchParams.get('error') === 'google-auth-failed') {
@@ -18,8 +19,17 @@ const Login = () => {
     }
   }, [searchParams]);
 
+  const validate = () => {
+    const e = {};
+    if (!form.email) e.email = 'Email is required';
+    if (!form.password) e.password = 'Password is required';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
     setLoading(true);
     try {
       await login(form.email, form.password);
@@ -75,22 +85,24 @@ const Login = () => {
             <input
               type="email"
               value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="input-field"
+              onChange={(e) => { setForm({ ...form, email: e.target.value }); setErrors((p) => ({ ...p, email: '' })); }}
+              className={`input-field ${errors.email ? 'border-red-500' : ''}`}
               placeholder="you@example.com"
               required
             />
+            {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
             <input
               type="password"
               value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="input-field"
+              onChange={(e) => { setForm({ ...form, password: e.target.value }); setErrors((p) => ({ ...p, password: '' })); }}
+              className={`input-field ${errors.password ? 'border-red-500' : ''}`}
               placeholder="••••••••"
               required
             />
+            {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password}</p>}
           </div>
           <div className="flex items-center justify-between text-sm">
             <label className="flex items-center gap-2 text-gray-400">
@@ -106,7 +118,12 @@ const Login = () => {
             disabled={loading}
             className="btn-primary w-full py-3 text-lg"
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                Signing in...
+              </span>
+            ) : 'Sign In'}
           </button>
           <p className="text-center text-gray-400 text-sm">
             Don't have an account?{' '}
