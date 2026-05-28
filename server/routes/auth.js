@@ -59,6 +59,7 @@ router.get('/google/callback',
     failureRedirect: `${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=google-auth-failed`,
   }),
   (req, res) => {
+    const isProduction = process.env.NODE_ENV === 'production';
     const token = jwt.sign(
       { id: req.user._id, role: req.user.role },
       process.env.JWT_SECRET,
@@ -67,7 +68,8 @@ router.get('/google/callback',
     const options = {
       expires: new Date(Date.now() + parseInt(process.env.JWT_COOKIE_EXPIRE || 7) * 24 * 60 * 60 * 1000),
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
     };
     res.cookie('token', token, options);
     res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}?google-auth=success`);

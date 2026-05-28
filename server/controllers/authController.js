@@ -4,12 +4,14 @@ const sendEmail = require('../utils/sendEmail');
 const crypto = require('crypto');
 
 const sendTokenResponse = (user, statusCode, res) => {
+  const isProduction = process.env.NODE_ENV === 'production';
   const token = user.generateAuthToken();
   const cookieDays = parseInt(process.env.JWT_COOKIE_EXPIRE) || 7;
   const options = {
     expires: new Date(Date.now() + cookieDays * 24 * 60 * 60 * 1000),
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
   };
 
   res.status(statusCode).cookie('token', token, options).json({
@@ -78,9 +80,12 @@ exports.login = async (req, res, next) => {
 };
 
 exports.logout = async (req, res, next) => {
+  const isProduction = process.env.NODE_ENV === 'production';
   res.cookie('token', 'none', {
     expires: new Date(Date.now() + 5 * 1000),
     httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
   });
 
   res.status(200).json({
