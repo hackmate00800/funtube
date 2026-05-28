@@ -72,6 +72,8 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.get('/healthz', (req, res) => res.json({ ok: true }));
+
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
