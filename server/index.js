@@ -156,7 +156,7 @@ process.on('unhandledRejection', (reason) => {
 
 connectDB().then(() => {
   const PORT = process.env.PORT || 5000;
-  server.listen(PORT, () => {
+  server.listen(PORT, '0.0.0.0', () => {
     logger.info(`FunTube Server running on port ${PORT}`);
   });
 });
