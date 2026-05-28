@@ -30,6 +30,7 @@ const io = new Server(server, {
   },
 });
 
+app.set('trust proxy', 1);
 app.set('io', io);
 
 app.use(helmet({
@@ -42,7 +43,7 @@ app.use(helmet({
       imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
       mediaSrc: ["'self'", 'blob:', 'https:'],
       fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-      connectSrc: ["'self'", 'https://apis.google.com', 'wss:'],
+      connectSrc: ["'self'", 'https://apis.google.com', 'https://www.googleapis.com', 'https://oauth2.googleapis.com', 'wss:'],
       frameSrc: ["'self'", 'https://accounts.google.com'],
       workerSrc: ["'self'", 'blob:'],
     },
@@ -105,6 +106,9 @@ app.use('/api/dubbing', require('./routes/dubbing'));
 app.use('/api/project-builder', require('./routes/projectBuilder'));
 app.use('/api/shorts', require('./routes/shorts'));
 app.use('/api/project-review', require('./routes/projectReview'));
+app.use('/api/drive', require('./routes/drive'));
+app.use('/api/invite', require('./routes/invite'));
+app.use('/api/admin', require('./routes/admin'));
 
 app.use(errorHandler);
 

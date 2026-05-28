@@ -6,7 +6,7 @@ import {
   HiLibrary, HiUserGroup, HiBadgeCheck, HiPlusCircle, HiStar,
   HiTrendingUp, HiEyeOff, HiChartBar, HiBookOpen,
   HiCode, HiAcademicCap, HiChat, HiBriefcase, HiScissors,
-  HiLightBulb, HiShieldCheck,
+  HiLightBulb, HiShieldCheck, HiUpload, HiCog,
 } from 'react-icons/hi';
 import { AuthContext } from '../../context/AuthContext';
 
@@ -82,6 +82,14 @@ const Sidebar = ({ sidebarCollapsed }) => {
         >
           <HiUserGroup className={`text-xl ${sidebarCollapsed ? 'text-2xl' : ''}`} />
           {!sidebarCollapsed && <span className="text-sm">Dashboard</span>}
+        </NavLink>
+        <NavLink
+          to="/uploader"
+          className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''} ${sidebarCollapsed ? 'justify-center px-2' : ''}`}
+          title={sidebarCollapsed ? 'Uploader' : ''}
+        >
+          <HiUpload className={`text-xl ${sidebarCollapsed ? 'text-2xl' : ''}`} />
+          {!sidebarCollapsed && <span className="text-sm">Uploader</span>}
         </NavLink>
         <NavLink
           to="/studio"
@@ -163,6 +171,16 @@ const Sidebar = ({ sidebarCollapsed }) => {
           <HiShieldCheck className={`text-xl ${sidebarCollapsed ? 'text-2xl' : ''}`} />
           {!sidebarCollapsed && <span className="text-sm">Project Review</span>}
         </NavLink>
+        {user?.role === 'admin' && (
+          <NavLink
+            to="/admin-dashboard"
+            className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''} ${sidebarCollapsed ? 'justify-center px-2' : ''}`}
+            title={sidebarCollapsed ? 'Admin' : ''}
+          >
+            <HiCog className={`text-xl ${sidebarCollapsed ? 'text-2xl' : ''}`} />
+            {!sidebarCollapsed && <span className="text-sm">Admin</span>}
+          </NavLink>
+        )}
         <NavLink
           to="/shorts-studio"
           className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''} ${sidebarCollapsed ? 'justify-center px-2' : ''}`}

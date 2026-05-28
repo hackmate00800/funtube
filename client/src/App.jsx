@@ -34,6 +34,9 @@ import CareerNavigator from './pages/CareerNavigator';
 import ProjectBuilder from './pages/ProjectBuilder';
 import ProjectReview from './pages/ProjectReview';
 import ShortsStudio from './pages/ShortsStudio';
+import UploaderDashboard from './pages/UploaderDashboard';
+import WatchInvite from './pages/WatchInvite';
+import AdminDashboard from './pages/AdminDashboard';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
@@ -61,6 +64,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/invite/:token" element={<WatchInvite />} />
       <Route
         path="/"
         element={
@@ -97,11 +101,20 @@ function App() {
         <Route path="shorts-studio" element={<ShortsStudio />} />
         <Route path="profile/:id" element={<Profile />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="uploader" element={<UploaderDashboard />} />
         <Route
           path="admin"
           element={
             <AdminRoute>
               <AdminPanel />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="admin-dashboard"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
             </AdminRoute>
           }
         />
