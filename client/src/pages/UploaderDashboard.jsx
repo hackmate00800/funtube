@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { driveAPI, inviteAPI } from '../services/driveAPI';
+import { driveAPI, inviteAPI, uploadFileToGoogle } from '../services/driveAPI';
 import toast from 'react-hot-toast';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const UploaderDashboard = () => {
   const [searchParams] = useSearchParams();
@@ -267,34 +265,52 @@ const UploadForm = ({ onUploaded }) => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [phase, setPhase] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file || !title) { toast.error('Title and video file are required'); return; }
     setUploading(true);
     setProgress(0);
+    setPhase('Initializing upload...');
     try {
-      const formData = new FormData();
-      formData.append('video', file);
-      formData.append('title', title);
-      formData.append('description', description);
-      formData.append('category', category);
-      formData.append('seriesName', seriesName);
-      formData.append('episodeNumber', episodeNumber);
-      formData.append('access', access);
-      await driveAPI.uploadVideo(formData, (e) => {
-        if (e.total) setProgress(Math.round((e.loaded / e.total) * 100));
+      const { data: initData } = await driveAPI.initUpload({
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: file.type || 'video/mp4',
+        title,
+        description,
+        category,
+        seriesName,
+        episodeNumber,
+        access,
       });
+      const { uploadUrl, sessionId } = initData;
+
+      setPhase('Uploading to Google Drive...');
+      const meta = await uploadFileToGoogle(uploadUrl, file, (pct) => {
+        setProgress(pct);
+      });
+
+      setPhase('Finalizing...');
+      const fileId = meta.id || meta.fileId || meta.resourceId;
+      if (!fileId) {
+        throw new Error('Could not retrieve file ID from Google Drive response');
+      }
+      await driveAPI.completeUpload({ sessionId, driveFileId: fileId, fileSize: file.size, mimeType: file.type });
+
       toast.success('Video uploaded to Google Drive!');
       setTitle('');
       setDescription('');
       setFile(null);
       setProgress(0);
+      setPhase('');
       onUploaded();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Upload failed');
+      toast.error(err.response?.data?.message || err.message || 'Upload failed');
     } finally {
       setUploading(false);
+      setPhase('');
     }
   };
 
@@ -352,12 +368,17 @@ const UploadForm = ({ onUploaded }) => {
         {uploading && (
           <div className="space-y-1">
             <div className="flex justify-between text-sm text-gray-400">
-              <span>Uploading to Drive...</span>
-              <span>{progress}%</span>
+              <span>{phase || 'Uploading...'}</span>
+              <span>{Math.round(progress)}%</span>
             </div>
             <div className="w-full bg-dark-800 rounded-full h-2">
               <div className="bg-primary-500 h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
             </div>
+            {file && (
+              <p className="text-xs text-gray-500">
+                {(file.size / (1024 * 1024 * 1024)).toFixed(2)} GB &middot; 10 MB chunks
+              </p>
+            )}
           </div>
         )}
         <button type="submit" disabled={uploading} className="btn-primary w-full py-3">

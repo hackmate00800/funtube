@@ -1,27 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
 const { protect } = require('../middleware/auth');
 const {
   getAuthUrl,
   handleCallback,
   getStatus,
   disconnect,
-  uploadVideo,
+  initUpload,
+  completeUpload,
   getMyVideos,
   getVideo,
   updateVideo,
   deleteVideo,
 } = require('../controllers/driveController');
 
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 500 * 1024 * 1024 } });
-
 router.get('/auth-url', protect, getAuthUrl);
 router.get('/callback', protect, handleCallback);
 router.get('/status', protect, getStatus);
 router.post('/disconnect', protect, disconnect);
 
-router.post('/upload', protect, upload.single('video'), uploadVideo);
+router.post('/upload/init', protect, initUpload);
+router.post('/upload/complete', protect, completeUpload);
 router.get('/videos', protect, getMyVideos);
 router.get('/videos/:id', protect, getVideo);
 router.put('/videos/:id', protect, updateVideo);
